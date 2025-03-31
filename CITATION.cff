@@ -1,0 +1,102 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Q-Cluster: Quantum Error Mitigation Through Noise-Aware
+  Unsupervised Learning
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Hrushikesh Pramod
+    family-names: Patil
+    email: hpatil2@ncsu.edu
+    affiliation: North Carolina State University
+  - given-names: Dror
+    family-names: Baron
+    email: dzbaron@ncsu.edu
+    affiliation: North Carolina State University
+  - given-names: Huiyang
+    family-names: Zhou
+    email: hzhou@ncsu.edu
+    affiliation: North Carolina State University
+repository-code: 'https://github.com/hrushikesh890/Q-Cluster'
+abstract: >-
+  uantum error mitigation (QEM) is critical to
+
+  reduce the noise impact in the pre-fault-tolerant era and
+  is ex-
+
+  pected to complement error correction in fault-tolerant
+  quantum
+
+  computing (FTQC). In this paper, we propose a novel QEM
+
+  approach, Q-Cluster, that uses unsupervised learning
+  (clustering)
+
+  to reshape the measured bit-string distribution. Our
+  approach
+
+  starts with a simplified bit-flip noise model. It first
+  performs
+
+  clustering on noisy measurement results, i.e.,
+  bit-strings, based on
+
+  the Hamming distance. The centroid of each cluster is
+  calculated
+
+  using a qubit-wise majority vote. Next, the noisy
+  distribution is
+
+  adjusted with the clustering outcomes and the bit-flip
+  error rates
+
+  using Bayesian inference. Our simulation results show that
+  Q-
+
+  Cluster can mitigate high noise rates (up to 40% per
+  qubit) with
+
+  the simple bit-flip noise model. However, real
+  superconducting
+
+  quantum computers do not fit such a simple noise model.
+
+  To address the problem, we (a) apply Pauli twirling to
+  tailor
+
+  the complex noise channels to Pauli errors, and (b) employ
+  a
+
+  machine learning model, ExtraTrees regressor, to estimate
+  an
+
+  effective bit-flip error rate using a feature vector
+  consisting of
+
+  machine calibration data (gate & measurement error rates),
+
+  circuit features (number of qubits, numbers of different
+  types of
+
+  gates, etc.) and the shape of the noisy distribution
+  (i.e., entropy).
+
+  Our experimental results show that our proposed Q-Cluster
+
+  scheme achieves a mean fidelity improvement of 1.46x
+  compared
+
+  to the unmitigated output distribution for a set of low
+  entropy
+
+  benchmarks on five different IBM quantum machines, outper-
+
+  forming the state-of-art QEM approaches M3 [24], Hammer
+  [34],
+
+  and QBEEP [32] by 1.29x, 1.47x, and 2.65x, respectively.

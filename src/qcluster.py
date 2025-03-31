@@ -20,6 +20,53 @@ def convert_data(data, n):
         data[k] = int(data[k]*n)
     return data
 
+def random_bitflip(ip, prob=0.45, seed = 10):
+    ret = {}
+    random.seed(seed)
+    for z in ip.keys():
+        for k in range(0, ip[z]):
+            s = list(z)
+            for i in range(0, len(z)):
+                if random.random() < prob:
+                    s[i] = '0' if s[i] == '1' else '1'
+            s = "".join(s)
+            ret[s] = ret.get(s, 0) + 1
+    return collections.Counter(ret)
+
+def multiply_dict(data, n):
+    """
+    Multiplies each value in the dictionary by n.
+    
+    Args:
+        data (dict): Dictionary containing data values
+        n (int): Number to multiply values by
+    """
+    new_data = {}
+    for k in data.keys():
+        new_data[k] = int(data[k]*n)
+    return new_data
+
+def generate_bitstring_dict(num_strings, num_bits, total_sum, seed=32):
+    # Generate unique bitstrings
+    random.seed(seed)
+    bitstrings = set()
+    while len(bitstrings) < num_strings:
+        bitstrings.add(''.join(random.choice('01') for _ in range(num_bits)))
+    
+    bitstrings = list(bitstrings)
+
+    # Generate random positive values that sum to total_sum
+    partitions = sorted(random.sample(range(1, total_sum), num_strings - 1))
+    if num_strings == 1:
+        values = [total_sum]
+    else:
+        values = [partitions[0]] + [partitions[i] - partitions[i-1] for i in range(1, num_strings - 1)] + [total_sum - partitions[-1]]
+
+    # Shuffle values to avoid predictable distribution
+    random.shuffle(values)
+
+    return dict(zip(bitstrings, values))
+
 def restruct_data(ip, count):
     """
     Restructures data by repeating each key's list based on its count.
