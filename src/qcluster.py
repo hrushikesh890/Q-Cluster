@@ -1,9 +1,32 @@
 import numpy as np
-import random
+import random, pickle, math
 import collections
 from sklearn.cluster import KMeans
 from qiskit.quantum_info import hellinger_fidelity
 from qiskit_aer import AerSimulator
+
+def shannon_entropy_from_dict(prob_dict):
+    """
+    Calculate the Normalized Shannon entropy from a dictionary of probabilities.
+    
+    Parameters:
+    prob_dict (dict): A dictionary where keys are bitstrings and values are their probabilities.
+    
+    Returns:
+    float: The Shannon entropy in bits.
+    """
+    # Check if probabilities sum to 1
+    prob_dict = renormalize_inplace(prob_dict)
+    total_prob = sum(prob_dict.values())
+
+    if not math.isclose(total_prob, 1.0, rel_tol=1e-9):
+        raise ValueError("The sum of probabilities must be 1. Current sum: {}".format(total_prob))
+    n = len(list(prob_dict.keys())[0])
+    max_entropy = math.log(2**n, 2)
+    # Calculate entropy
+    entropy = -sum(p * math.log(p, 2) for p in prob_dict.values() if p > 0)
+    return entropy/max_entropy
+
 
 def convert_data(data, n):
     """
@@ -32,6 +55,8 @@ def random_bitflip(ip, prob=0.45, seed = 10):
             s = "".join(s)
             ret[s] = ret.get(s, 0) + 1
     return collections.Counter(ret)
+
+
 
 def multiply_dict(data, n):
     """
@@ -94,10 +119,10 @@ class KMeans1DBitNA:
     
     Args:
         n_clusters (int): Number of clusters
-        max_iter (int): Maximum number of iterations
-        seed (int): Random seed
-        cent (list): Initial centroids
-        threshold (float): Hamming distance threshold
+        max_iter (int): Maximum number of iterations (default: 300) (optional)
+        seed (int): Random seed (default: 10) (optional)
+        cent (list): Initial centroids (default: None) (optional)
+        threshold (float): Hamming distance threshold (default: None) (Non - optional)
         init_method (str): Method for initializing centroids ('random' or 'top_k')
     """
     def __init__(self, n_clusters, max_iter=300, seed=10, cent=None, threshold=None, init_method='random'):
@@ -271,21 +296,21 @@ class KMeans1DBitNA:
 
 class QCluster:
     """
-    Quantum clustering algorithm for noisy binary strings.
+    Quantum clustering error mitigation algorithm for noisy binary strings.
     
     Args:
         max_clusters (int): Maximum number of clusters
-        n (int): Number of samples
+        n (int): Number of qubits
         max_iter (int): Maximum iterations per clustering
-        tol (float): Convergence tolerance
-        method (int): Clustering method
-        prob (float): Noise probability
-        init_method (str): Centroid initialization method
-        mul (float): Threshold multiplier
-        s_clus (int): Starting number of clusters
-        logging (bool): Enable logging
+        tol (float): Convergence tolerance (default: 0.95)
+        method (int): Clustering method (default: 0) (optional)
+        prob (float): Bit-flip Noise probability (default: 0.1) (mandatory)
+        init_method (str): Centroid initialization method (default: "top_k")
+        mul (float): Threshold multiplier (default: 2.0)
+        s_clus (int): Starting number of clusters (default: 1)
+        logging (bool): Enable logging for debugging (default: False) 
     """
-    def __init__(self, max_clusters, n, max_iter=300, tol=0.95, method=0, prob = 0.1, init_method = "top_k", mul = 1.0, s_clus = 1, logging = False):
+    def __init__(self, max_clusters, n, max_iter=300, tol=0.95, method=0, prob = 0.1, init_method = "top_k", mul = 2.0, s_clus = 1, logging = False):
         self.max_clusters = max_clusters
         self.max_iter = max_iter
         self.tol = tol
@@ -314,6 +339,8 @@ class QCluster:
         Returns:
             dict: Cluster assignments
         """
+        
+        data = restruct_data(data, 1) # Ensure X is not normalized
         n_clusters = self.s_clus
         prev_fid = -1
         curr_fid = 0
@@ -338,7 +365,7 @@ class QCluster:
                 self.n_labels = self.labels_
 
             if self.logging:
-                self.log_data[str(it)] = [ curr_fid, np.unique(self.raw_labels, return_counts=True), self.centroids, self.labels_]
+                self.log_data[str(it)] = [ curr_fid, np.unique(self.raw_labels, return_counts=True), self.centroids, collections.Counter(self.labels_)]
                 it+= 1
             n_clusters += 1
         self.f_clus = n_clusters - 2
@@ -350,6 +377,7 @@ class QCluster:
     def fit_x(self, data, n_clusters):
         """
         Fits model with fixed number of clusters.
+        Use it for Q-Cluster fixed clusters
         
         Args:
             data (np.array): Array of binary strings
@@ -358,6 +386,7 @@ class QCluster:
         Returns:
             dict: Cluster assignments
         """
+        data = restruct_data(data, 1) # Ensure X is not normalized
         threshold = self.n*self.prob*(1 - self.prob)*self.mul
         kmeans = KMeans1DBitNA(n_clusters, max_iter=self.max_iter, threshold=threshold, init_method=self.init_method)       
         kmeans.fit(data)
@@ -662,3 +691,11 @@ def get_esp_modified_therm(qc, num_qubits, backend = None, backend_prop = None, 
             key=node.qargs[0]._index
             esp=esp*readout_reliability[key]
     return esp
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+
+def load_object(filename):
+     with open(filename, 'rb') as outp:  # Overwrites any existing file.
+        return pickle.load(outp)
