@@ -27,7 +27,7 @@ Replace `<your-environment-name>` with the actual environment name defined in yo
 
 - **APIs**: All APIs related to **Q-Cluster** are implemented in [`src/qcluster.py`](src/qcluster.py).
 
-- **Demonstration**: A small demonstration notebook [`src/dem.ipynb`](src/demo.ipynb) is provided to illustrate how to effectively use Q-Cluster.
+- **Demonstration**: A small demonstration notebook [`src/demo.ipynb`](src/demo.ipynb) is provided to illustrate how to effectively use Q-Cluster.
 
 - **Data**: Example data for running demonstrations on real quantum hardware can be found in the [`data/`](data/) directory.
 
@@ -40,7 +40,7 @@ Replace `<your-environment-name>` with the actual environment name defined in yo
 ├── data/             # Data files for real machine demonstrations
 ├── src/
 │   ├── qcluster.py   # Main APIs for Q-Cluster
-│   └── dem.ipynb     # Demonstration notebook
+│   └── demo.ipynb     # Demonstration notebook
 ├── environment.yml   # Environment dependencies
 └── README.md         # Project description and instructions
 ```
